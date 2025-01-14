@@ -1,6 +1,6 @@
 <?php
 
-class LayoutRegister_Test extends \PHPUnit\Framework\TestCase
+class Layout_Register_Test extends \PHPUnit\Framework\TestCase
 {
 	use \Dxw\Iguana\Theme\Testing;
 
