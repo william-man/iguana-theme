@@ -1,37 +1,34 @@
 <?php
 
-describe("Layout_Test", function(){
+describe(\Dxw\Iguana\Theme\Layout::class, function(){
     beforeEach(function(){
-        \WP_Mock::setUp();
+        $this->layout = new \Dxw\Iguana\Theme\Layout();
     });
 
     afterEach(function(){
-        \WP_Mock::tearDown();
-
-        \Dxw\Iguana\Theme\Layout::$wordpress_template = null;
-		\Dxw\Iguana\Theme\Layout::$base = null;
     });
 
     it("test apply", function(){
-        expect(\Dxw\Iguana\Theme\Layout::apply('x/y/z.php'))->toBeAnInstanceOf(\Dxw\Iguana\Theme\Layout::class);
+        $test = $this->layout::apply('x/y/z.php');
+        expect($test)->toBeAnInstanceOf(\Dxw\Iguana\Theme\Layout::class);
         expect(\Dxw\Iguana\Theme\Layout::$wordpress_template)->toBe('x/y/z.php');
         expect(\Dxw\Iguana\Theme\Layout::$base)->toBe('z');
     });
 
     it("test to string", function(){
-        $layout = new \Dxw\Iguana\Theme\Layout();
-		$layout->slug = 'slug';
+		$this->layout->slug = 'slug';
+        $this->layout->templates = ['layouts/main.php'];
 
-        \WP_Mock::onFilter('roots_wrap_slug')
-        ->with(['layouts/main.php'])
-        ->reply(['layouts/my-layout.php']);
+        allow('\apply_filters')->toBeCalled()
+        ->with('roots_wrap_'.$this->layout->slug, $this->layout->templates)
+        ->andReturn(['layouts/my-layout.php']);
 
-		\WP_Mock::wpFunction('locate_template', [
-			'args' => [['layouts/my-layout.php']],
-			'return' => 'correct output',
-		]);
+        allow('\locate_template')
+        ->toBeCalled()
+        ->with(['layouts/my-layout.php'])
+        ->andReturn('correct output');
 
-        expect($layout->__toString())->toBe('correct output');
+        expect($this->layout->__toString())->toBe('correct output');
     });
 
     it("test constructor", function(){
