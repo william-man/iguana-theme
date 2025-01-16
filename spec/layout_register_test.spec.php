@@ -1,41 +1,35 @@
 <?php
 
-use \Dxw\Iguana\Theme\Testing;
+use Kahlan\Matcher\ToBe;
 
-class LayoutRegisterTestHelper{
-    use Testing;
-}
-
-describe("layout register test", function(){
-
+describe(\Dxw\Iguana\Theme\LayoutRegister::class, function(){
     beforeEach(function(){
-        \WP_Mock::setUp();
-        $this->helper = new LayoutRegisterTestHelper();
+        $this->helpers = new \Dxw\Iguana\Theme\Helpers();
+        $this->layoutRegister = new \Dxw\Iguana\Theme\LayoutRegister($this->helpers);
     });
     afterEach(function(){
-        \WP_Mock::tearDown();
-        \Dxw\Iguana\Theme\Layout::$wordpress_template = null;
     });
 
-    it("test register", function(){
-        $layoutRegister = new \Dxw\Iguana\Theme\LayoutRegister($this->helper->getHelpers());
-        
-        expect($layoutRegister)->toBeAnInstanceOf(\Dxw\Iguana\Registerable::class);
+    it("test register", function(){        
+        expect($this->layoutRegister)->toBeAnInstanceOf(\Dxw\Iguana\Registerable::class);
 
-        \WP_Mock::expectFilterAdded('template_include',[\Dxw\Iguana\Theme\Layout::class, 'apply'],99);
-        $layoutRegister->register();
+        allow('add_filter')
+        ->toBeCalled()
+        ->with('template_include',[\Dxw\Iguana\Theme\Layout::class, 'apply'], 99)
+        ->andReturn(true);
 
+        expect('add_filter')->toBeCalled()->once();
+        $this->layoutRegister->register();
     });
 
     it("test construct",function(){
-        $helpers = $this->helper->getHelpers(\Dxw\Iguana\Theme\LayoutRegister::class,['w_requested_template'=>'wRequestedTemplate',]);
-        $layoutRegister = new \Dxw\Iguana\Theme\LayoutRegister($helpers);
-
-        $this->helper->assertFunctionsRegistered();
+        allow($this->helpers)->toReceive('registerFunction');
+        
+        $layout = new \Dxw\Iguana\Theme\LayoutRegister($this->helpers);
+        expect($this->helpers)->toReceive('registerFunction')->with('w_requested_template', [$layout, 'wRequestedTemplate']);
     });
 
     it("test wrequested template",function(){
-        $layoutRegister = new \Dxw\Iguana\Theme\LayoutRegister($this->helper->getHelpers());
         $file = \org\bovigo\vfs\vfsStream::setup()->url().'/file.php';
 
         file_put_contents($file, '<?php global $called; $called++;');
@@ -44,7 +38,7 @@ describe("layout register test", function(){
         global $called;
         $called = 0;
 
-        $layoutRegister->wRequestedTemplate();
+        $this->layoutRegister->wRequestedTemplate();
 
         expect($called)->toBe(1);
     });
