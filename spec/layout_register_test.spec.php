@@ -1,7 +1,5 @@
 <?php
 
-use Kahlan\Matcher\ToBe;
-
 describe(\Dxw\Iguana\Theme\LayoutRegister::class, function(){
     beforeEach(function(){
         $this->helpers = new \Dxw\Iguana\Theme\Helpers();
