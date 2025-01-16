@@ -19,11 +19,11 @@ describe(\Dxw\Iguana\Theme\Layout::class, function(){
 		$this->layout->slug = 'slug';
         $this->layout->templates = ['layouts/main.php'];
 
-        allow('\apply_filters')->toBeCalled()
+        allow('apply_filters')->toBeCalled()
         ->with('roots_wrap_'.$this->layout->slug, $this->layout->templates)
         ->andReturn(['layouts/my-layout.php']);
 
-        allow('\locate_template')
+        allow('locate_template')
         ->toBeCalled()
         ->with(['layouts/my-layout.php'])
         ->andReturn('correct output');
